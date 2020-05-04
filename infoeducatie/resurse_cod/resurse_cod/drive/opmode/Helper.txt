@@ -1,0 +1,61 @@
+package org.firstinspires.ftc.teamcode.drive.opmode;
+
+import com.acmerobotics.dashboard.canvas.Spline;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.path.heading.ConstantInterpolator;
+import com.acmerobotics.roadrunner.path.heading.LinearInterpolator;
+import com.acmerobotics.roadrunner.path.heading.SplineInterpolator;
+import com.acmerobotics.roadrunner.path.heading.WiggleInterpolator;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveBase;
+import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREVOptimized;
+
+
+
+@Autonomous(name = "helper")
+public class Helper extends LinearOpMode {
+//    Servo prindeManaFata = null;
+//    Servo lasaManaFata = null;
+//    Servo lasaManaSpate = null;
+//    Servo prindeManaSpate = null;
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+//        lasaManaSpate = hardwareMap.servo.get("lasaManaSpate");
+//        prindeManaSpate = hardwareMap.servo.get("prindeManaSpate");
+//        lasaManaFata = hardwareMap.servo.get("lasaManaFata");
+//        prindeManaFata = hardwareMap.servo.get("prindeManaFata");
+//
+//        DcMotor motorSugeDreapta = hardwareMap.dcMotor.get("motorSugeDreapta");
+//        DcMotor motorSugeStanga = hardwareMap.dcMotor.get("motorSugeStanga");
+//        motorSugeDreapta.setDirection(DcMotorSimple.Direction.REVERSE);
+        SampleMecanumDriveBase drive = new SampleMecanumDriveREVOptimized(hardwareMap);
+        waitForStart();
+//        prindeManaSpate.setDirection(Servo.Direction.REVERSE);
+//
+//        prindeManaSpate.setPosition(0);
+//        lasaManaSpate.setPosition(0);
+//        lasaManaFata.setPosition(0);
+//        prindeManaFata.setPosition(0);
+
+        if(isStopRequested()) return;
+        drive.setPoseEstimate(new Pose2d(-39.0,63.0,Math.toRadians(-90.0)));
+        drive.followTrajectorySync(drive.trajectoryBuilder()
+                .lineTo(new Vector2d(-39.0,50.0))
+                .splineTo(new Pose2d(-47.5,22.5,Math.toRadians(-145.0)),new WiggleInterpolator(0.01,10,new ConstantInterpolator(Math.toRadians(-155.0))))
+                .splineTo(new Pose2d(-47.5,44.5,Math.toRadians(-180.0)),new ConstantInterpolator(Math.toRadians(-180.0)))
+                .strafeTo(new Vector2d(15.0,44.5))
+                .strafeTo(new Vector2d(19.0,34.5))
+                .splineTo(new Pose2d(44.0,34.5,Math.toRadians(-180.0)),new SplineInterpolator(Math.toRadians(-270.0), Math.toRadians(-180.0)))
+
+                .build());
+
+    }
+}

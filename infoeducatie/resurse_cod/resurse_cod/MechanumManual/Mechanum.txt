@@ -1,0 +1,34 @@
+package org.firstinspires.ftc.teamcode.MechanumTeleOp;
+
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.Libs.GAMEPAD;
+
+
+@TeleOp(name = "Mechanum", group = "TeleOp" )
+public class Mechanum extends OpMode {
+
+    private MechanumDrive mechanumDrive = null;
+    private Mechanism mechanism = null;
+    private Lift lift = null;
+    @Override
+    public void init() {
+        GAMEPAD gamepad1 = new GAMEPAD(this.gamepad1,this.telemetry);
+        GAMEPAD gamepad2 = new GAMEPAD(this.gamepad2,this.telemetry);
+        mechanumDrive = new MechanumDrive(this.hardwareMap,telemetry,gamepad1,gamepad2);
+        mechanism = new Mechanism(this.hardwareMap,gamepad1,gamepad2,telemetry);
+        lift = new Lift(this.hardwareMap, telemetry, gamepad2);
+    }
+
+    @Override
+    public void loop() {
+        mechanism.telemetryAdder();
+        mechanism.suge();
+        mechanism.tablita();
+        mechanumDrive.goTeleOp();
+     //   mechanism.ruleta();
+        lift.liftLoop();
+        telemetry.update();
+    }
+}

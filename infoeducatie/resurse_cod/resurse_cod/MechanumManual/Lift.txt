@@ -1,0 +1,203 @@
+package org.firstinspires.ftc.teamcode.MechanumTeleOp;
+
+import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.controller.PIDFController;
+import com.arcrobotics.ftclib.hardware.motors.MotorImpl;
+import com.arcrobotics.ftclib.hardware.motors.MotorImplEx ;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.AndreiUtils.SimpleLift;
+import org.firstinspires.ftc.teamcode.Libs.GAMEPAD;
+
+@Config
+public class Lift {
+
+
+    int pressed = 0;
+    int unpressed  = 0 ;
+    boolean moving = false;
+    boolean up = false;
+    public static  double kP = 0.007;
+    public static  double kI = 0.0024;//0.3;
+    public static  double kD = 0.00008;//0.0015;
+    public static  double kF = 0.008;
+    public static  double kThreshold = 5;
+
+    private SimpleLift glisieraStanga = null;
+    private Servo prindeCub = null;
+    private CRServo glisieraSus = null;
+    Telemetry telemetry ;
+    double power ;
+    double gabi;
+    private MotorImplEx slideMotor1;
+    private MotorImplEx slideMotor2;
+
+    private SimpleLift lift;
+
+    PIDFController pidf = new PIDFController(
+            new double[]{kP, kI, kD, kF}
+    );
+
+
+    public static int MAX_STAGE = 14;
+    public static double TICKS_BETWEEN_LIFTS = 400;
+    public static int RISE_AFTER_DELIVERY = 600;
+    public static int GROUND_LAYER = 1;
+    Stage stage = new Stage();
+
+
+    private GAMEPAD gamepad2 ;
+
+    private void initLift(HardwareMap hardwareMap){
+        stage = new Stage();
+
+        glisieraSus = hardwareMap.crservo.get("glisieraSus");
+        prindeCub = hardwareMap.servo.get("prindeCub");
+        prindeCub.setDirection(Servo.Direction.REVERSE);
+
+        pidf.reset();
+        pidf.setTolerance(kThreshold);
+
+        slideMotor1 = new MotorImplEx(new MotorImpl(hardwareMap, "glisieraStanga", 537.6),pidf);
+        slideMotor2 = new MotorImplEx(new MotorImpl(hardwareMap, "glisieraDreapta", 537.6),pidf);
+        slideMotor1.encoder.resetEncoderCount();
+
+        lift = new SimpleLift(slideMotor1, slideMotor2, pidf,false,true,true);
+
+        prindeCub.setPosition(0);
+        slideMotor1.encoder.resetEncoderCount();
+    }
+
+    Lift(HardwareMap hardwareMap, Telemetry telemetry, GAMEPAD gamepad){
+        this.telemetry = telemetry;
+        this.gamepad2 = gamepad;
+        initLift(hardwareMap);
+    }
+
+    void liftLoop(){
+      glisieraSus();
+       liftState();
+       prindeCub();
+        setStage();
+        lifter();
+        power();
+
+        telemetryLog();
+    }
+    void telemetryLog(){
+        telemetry.addData("enc puls", slideMotor1.getEncoderPulses());
+        telemetry.addData("stage", stage.getStage());
+        telemetry.addData("stageVAL", stage.getStageValue());
+        telemetry.addData("velocity", slideMotor1.getVelocity());
+        telemetry.addData("rb", gamepad2.right_bumper.pressed);
+        telemetry.addData("lb", gamepad2.left_bumper.pressed);
+        telemetry.addData("stage", (gamepad2.right_bumper.pressed - gamepad2.left_bumper.pressed)/MAX_STAGE);
+        telemetry.addData("glis dreapta encoder", slideMotor2.getEncoderPulses());
+    }
+
+    void liftState() {
+        if (gamepad2.x.toggle) {
+                lift.moveToPosition(stage.getStageValue());
+
+            }
+        if (gamepad2.a.toggle) {
+               prindeCub.setPosition(0);
+               ElapsedTime uptime = new ElapsedTime();
+               uptime.reset();
+               while(uptime.milliseconds()<300) {
+                   prindeCub.setPosition(0);
+               }
+
+                lift.moveToPosition(slideMotor1.getEncoderPulses() + 200);
+
+                uptime.reset();
+                while (uptime.seconds() < 1.5) {
+                    glisieraSus.setPower(-0.5);
+                }
+                   lift.goDown();
+                }
+            }
+
+
+//
+//
+//
+//
+//      switch (State){
+//
+//          case DOWN:{
+//              if(gamepad2.x.value){
+//                  lift.moveToPosition(stage*TICKS_BETWEEN_LIFTS);
+//                    while(slideMotor1.getEncoderPulses() < stage*TICKS_BETWEEN_LIFTS*7/10){
+//                        ajunsTarget = true;
+//                        glisieraSus.setPower(0.5);
+//                    }
+//                    if(ajunsTarget){
+//                        ElapsedTime uptime = new ElapsedTime();
+//                        uptime.reset();
+//                        while(uptime.milliseconds()<2000){
+//                            glisieraSus.setPower(0.5);
+//                        }
+//                        ajunsTarget = false;
+//                    }
+//                  State = STATE.TOP;
+//              }
+//              break;
+//          }
+//          case TOP:
+//              if(gamepad2.a.value){
+//                  lift.moveToPosition(RISE_AFTER_DELIVERY+slideMotor1.getEncoderPulses());
+//                  ElapsedTime uptime = new ElapsedTime();
+//                  uptime.reset();
+//                  while(uptime.seconds()<1.5){
+//                      glisieraSus.setPower(-0.5);
+//                  }
+//                  lift.goDown();
+//                  slideMotor1.encoder.stopAndReset();
+//                  prindeCub.setPosition(0);
+//              }
+//              break;
+//      }
+
+
+        void lifter () {
+            lift.moveLift(-power);
+        }
+
+        void power () {
+            power = gamepad2.right_stick_powerY;
+        }
+
+        void prindeCub () {
+            if (gamepad2.y.toggle) {
+                prindeCub.setPosition(0.65 );
+            } else {
+                prindeCub.setPosition(0);
+            }
+        }
+
+        void setStage () {
+            if (gamepad2.right_bumper.value || gamepad2.left_bumper.value) {
+                stage.stageSet((gamepad2.right_bumper.pressed-gamepad2.left_bumper.pressed)%MAX_STAGE);
+            }
+
+        }
+
+        void glisieraSus () {
+        glisieraSus.setPower(gamepad2.left_stick_powerY);
+//            if (gamepad2.right_trigger > 0.3) {
+//                glisieraSus.setPower(1);
+//            } else if (gamepad2.left_trigger > 0.3) {
+//                glisieraSus.setPower(-0.5);
+//            } else {
+//                glisieraSus.setPower(0);
+//            }
+        }
+
+    }
+
+

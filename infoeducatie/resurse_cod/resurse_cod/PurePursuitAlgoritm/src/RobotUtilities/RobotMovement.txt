@@ -1,0 +1,134 @@
+package RobotUtilities;
+
+
+import Utils.Point;
+
+import com.company.FloatPoint;
+
+import java.util.ArrayList;
+
+
+import static RobotUtilities.MovementVars.*;
+import static RobotUtilities.SimpleMovement.goToPosition;
+import static Utils.Geometry.angleWrapRad;
+import static Utils.Geometry.lineCircleIntersection;
+import static com.company.Robot.*;
+import static java.lang.StrictMath.*;
+
+public class RobotMovement {
+
+
+    public static void followCurve(ArrayList<CurvePoint> allPoints, double followAngle){
+        addLastPoint(allPoints);
+        System.out.println(whereAmI(allPoints) + " " + allPoints.get(whereAmI(allPoints)).followDistance + "\n" + allPoints.size());
+
+        double followDistance = allPoints.get(whereAmI(allPoints)).followDistance;
+        CurvePoint followMe = getFollowPointPath(allPoints, new Point(worldXPosition,worldYPosition),followDistance);
+
+        ComputerDebugging.sendKeyPoint(new FloatPoint(followMe.x,followMe.y));
+
+        goToPosition(followMe.x,followMe.y,followMe.moveSpeed,followAngle,followMe.turnSpeed);
+        if(whereAmI(allPoints) == allPoints.size()-2){
+            movement_x = 0;
+            movement_y = 0;
+            movement_turn = 0;
+            return;
+        }
+    }
+
+
+    public static int whereAmI(ArrayList<CurvePoint> allPoints){
+        int index = 0;
+        double closestDistance = 10000000;
+
+        for(int i=1;i<allPoints.size()-1;i++){
+            CurvePoint lastCurvePoint = allPoints.get(i-1);
+            CurvePoint currentCurvePoint = allPoints.get(i);
+            CurvePoint futureCurvePoint = allPoints.get(i+1);
+
+
+            double d1 = linePointProjection(lastCurvePoint.toPoint(),currentCurvePoint.toPoint());
+            double d2 = linePointProjection(currentCurvePoint.toPoint(),futureCurvePoint.toPoint());
+
+
+            if(closestDistance > d1){
+                closestDistance = d1;
+                index = i;
+            }
+            if(closestDistance>d2){
+                closestDistance = d2;
+                index = i+1;
+            }
+        }
+
+        return index;
+    }
+
+    public static double linePointProjection(Point p1, Point p2){
+        double distance = 9999999;
+        double minX = min(p1.x ,p2.x);
+        double maxX = max(p1.x ,p2.x);
+
+        double minY = min(p1.y ,p2.y);
+        double maxY = max(p1.y ,p2.y);
+
+        if(abs(p1.x - p2.x) < 0.03){
+            if(worldYPosition<maxY && worldYPosition > minY){
+                return abs(worldXPosition - minX);
+            }
+        }
+
+        if(abs(p1.y - p2.y) < 0.03){
+            if(worldXPosition<maxX && worldXPosition > minX){
+                return abs(worldYPosition - minY);
+            }
+        }
+        double m1 = (p2.y-p1.y)/(p2.x-p1.x);
+        double b1 = p2.y - m1*p2.x;
+        double m2 = -(1/m1);
+        double b2 = worldYPosition - (m2 * worldXPosition);
+        double x = (m1 * b2 - m1 * b1) / (m1 * m1 + 1);
+        double y = m2*x + b2;
+        if(x < maxX && x > minX){
+            distance = hypot(x-worldXPosition  ,y-worldYPosition);
+        }
+        return distance;
+    }
+
+    public static CurvePoint getFollowPointPath(ArrayList<CurvePoint> pathPoints, Point robotLocation, double followRadius){
+        CurvePoint followMe = new CurvePoint(pathPoints.get(0));
+
+        for(int i=0;i<pathPoints.size()-1;i++){
+            CurvePoint startLine = pathPoints.get(i);
+            CurvePoint endLine = pathPoints.get(i+1);
+
+            ArrayList<Point> intersections = lineCircleIntersection(robotLocation,followRadius,startLine.toPoint(),
+                                   endLine.toPoint());
+
+            double closestAngle = 1000000;
+
+            for(Point thisIntersection : intersections){
+                double angle = Math.atan2(thisIntersection.y - worldYPosition, thisIntersection.x - worldXPosition);
+                double deltaAngle = Math.abs(angleWrapRad(angle - worldAngle_rad));
+
+                if(deltaAngle < closestAngle){
+                    closestAngle = deltaAngle;
+                    followMe.setPoint(thisIntersection);
+                }
+            }
+        }
+        return followMe;
+    }
+
+    public static void addLastPoint(ArrayList<CurvePoint> allPoints){
+        CurvePoint lastPoint = new CurvePoint(allPoints.get(allPoints.size()-1));
+        double distance = lastPoint.followDistance ;
+        CurvePoint lastCurvePoint = allPoints.get(allPoints.size()-1);
+        Point p1 = allPoints.get(allPoints.size()-2).toPoint();
+        Point p2 = allPoints.get(allPoints.size()-1).toPoint();
+
+        allPoints.add(new CurvePoint(p2.x + (p2.x - p1.x)/hypot(p2.x-p1.x,p2.y-p2.x)*distance, p2.y + (p2.y - p1.y)/hypot(p2.x-p1.x,p2.y-p2.x)*distance , lastCurvePoint.moveSpeed, lastCurvePoint.turnSpeed,
+                0, lastCurvePoint.slowDownTurnRadians, lastCurvePoint.slowDownTurnAmount));
+    }
+
+}

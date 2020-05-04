@@ -1,0 +1,392 @@
+//package org.firstinspires.ftc.teamcode.drive.opmode;
+//
+//import com.acmerobotics.roadrunner.geometry.Pose2d;
+//import com.acmerobotics.roadrunner.geometry.Vector2d;
+//import com.acmerobotics.roadrunner.trajectory.Trajectory;
+//import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
+//import com.acmerobotics.roadrunner.trajectory.constraints.MecanumConstraints;
+//import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+//import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+//import com.qualcomm.robotcore.hardware.Servo;
+//
+//import org.firstinspires.ftc.teamcode.VisionEasyOpenCv.skystoneDetectorClass;
+//import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveBase;
+//import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREVOptimized;
+//
+//import static org.firstinspires.ftc.teamcode.drive.DriveConstants.BASE_CONSTRAINTS;
+//import static org.firstinspires.ftc.teamcode.drive.DriveConstants.FAST_CONSTRAINTS;
+//import static org.firstinspires.ftc.teamcode.drive.DriveConstants.ONEBIG_CONSTRAINTS;
+//import static org.firstinspires.ftc.teamcode.drive.DriveConstants.TRACK_WIDTH;
+//
+///**
+// * Made by DON 30.01.2020
+// *
+// */
+//
+//@Autonomous(name ="AutonomieRosu", group = "drive")
+//public class AutoRED extends LinearOpMode {
+//
+//    Servo agataStanga;
+//    Servo agataDreapta;
+//    Servo prindeManaFata = null;
+//    Servo lasaManaFata = null;
+//    Servo lasaManaSpate = null;
+//    Servo prindeManaSpate = null;
+//    Servo prindeCap = null;
+//
+//
+//    @Override
+//    public void runOpMode() throws InterruptedException {
+//        skystoneDetectorClass detector = new skystoneDetectorClass();
+//        int[] vals;
+//        detector.camSetup(hardwareMap);
+//        SampleMecanumDriveBase drive = new SampleMecanumDriveREVOptimized(hardwareMap);
+//        prindeCap = hardwareMap.servo.get("prindeCap");
+//        lasaManaSpate = hardwareMap.servo.get("lasaManaSpate");
+//        prindeManaSpate = hardwareMap.servo.get("prindeManaSpate");
+//        lasaManaFata = hardwareMap.servo.get("lasaManaFata");
+//        prindeManaFata = hardwareMap.servo.get("prindeManaFata");
+//        agataDreapta = hardwareMap.servo.get("tablitaDreapta");
+//        agataStanga = hardwareMap.servo.get("tablitaStanga");
+//
+//        vals = detector.getVals();
+//
+//        while(vals[1]!=69 && vals[0]!=69 && vals[2]!=69 && !opModeIsActive() && !isStopRequested()){
+//            detector.updateVals();
+//            vals = detector.getVals();
+//            telemetry.addData("Values", vals[1]+ "   " +vals[0]+"   "+vals[2]);
+//            telemetry.addData("updating","vals");
+//            telemetry.update();
+//        }
+//        telemetry.clear();
+//        telemetry.addData("Values", vals[1]+ "   " +vals[0]+"   "+vals[2]);
+//        telemetry.addData("Calibration " , "done");
+//        telemetry.update();
+//
+//        waitForStart();
+//        prindeCap.setPosition(1);
+//
+//        agataStanga.setDirection(Servo.Direction.FORWARD);
+//        agataDreapta.setDirection(Servo.Direction.REVERSE);
+//
+//        prindeManaSpate.setDirection(Servo.Direction.REVERSE);
+//
+//        prindeManaSpate.setPosition(0);
+//        lasaManaSpate.setPosition(0);
+//        lasaManaFata.setPosition(0);
+//        prindeManaFata.setPosition(0);
+//
+//        if (isStopRequested()) return;
+//
+//
+//        if(vals[0] == 0){//mijloc
+//            cazCentruRosu(drive);
+//        } else if(vals[1] == 0) {//stanga
+//            cazStangaRosu(drive);
+//        } else {//dreapta
+//            cazDreaptaRosu(drive);
+//        }
+//
+//
+//    }
+//
+//    public void prindeSpate(){
+//        lasaManaSpate.setPosition(1);
+//        sleep(200);
+//        prindeManaSpate.setPosition(1);
+//        sleep(550);
+//        lasaManaSpate.setPosition(0);
+//    }
+//    public void lasaSpate(){
+//        lasaManaSpate.setPosition(1);
+//        sleep(80);
+//        prindeManaSpate.setPosition(0);
+//        sleep(200);
+//        lasaManaSpate.setPosition(0);
+//    }
+//
+//    public void prinde(){
+//        lasaManaFata.setPosition(1);
+//        sleep(200);
+//        prindeManaFata.setPosition(1);
+//        sleep(550);
+//        lasaManaFata.setPosition(0);
+//    }
+//    public void lasa(){
+//        lasaManaFata.setPosition(1);
+//        sleep(80);
+//        prindeManaFata.setPosition(0);
+//        sleep(200);
+//        lasaManaFata.setPosition(0);
+//    }
+//    public void cazDreaptaRosu(SampleMecanumDriveBase drive){
+//        lasaManaSpate.setPosition(0.5);
+//        //TODO 1 cub
+//        drive.followTrajectorySync(drive.trajectoryBuilder().strafeTo(new Vector2d(-9.5,25.5)).build());
+//        prindeSpate();
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(-9.5,25.5,0), new MecanumConstraints(FAST_CONSTRAINTS, TRACK_WIDTH))
+//                .strafeTo(new Vector2d(20,22))
+//                .strafeTo(new Vector2d(60,22))
+//                .strafeTo(new Vector2d(85,31.2))
+//                .build());
+//        lasaSpate();
+//        //TODO 2 cub
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(85,31.2,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .reverse()
+//                .strafeTo(new Vector2d(45,24.5))
+//                .strafeTo(new Vector2d(35,24.7))
+//                .strafeTo(new Vector2d(13.7,29.3))
+//                .build());
+//        prindeSpate();
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(13.7,29.3,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(25,24.5))
+//                .strafeTo(new Vector2d(60,24.7))
+//                .strafeTo(new Vector2d(92,31.8))
+//                .build());
+//        lasaSpate();
+//        //TODO 3 cub
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(92,31.8,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(60,24.5))
+//                .strafeTo(new Vector2d(35,24.7))
+//                .strafeTo(new Vector2d(5.6,29.5))
+//                .build());
+//        prindeSpate();
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(5.6,29.5,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(25,24.3))
+//                .strafeTo(new Vector2d(60,24.3))//-80 23
+//                .strafeTo(new Vector2d(77.5,31.7)) //x =-100 y=29.5
+//                .build());
+//        lasaSpate();
+//        //TODO 4 cub
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(77.5,31.7,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(60,24.5))
+//                .strafeTo(new Vector2d(20,24.5))
+//                .strafeTo(new Vector2d(-12.1,30.2))
+//                .build()
+//        );
+//        prinde();
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(-12.1,30.2,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(10,24.4))
+//                .strafeTo(new Vector2d(70,24.4))//-80 23
+//                .strafeTo(new Vector2d(89,33.6)) //x =-100 y=29.5
+//                .build());
+//        lasa();
+//
+//
+//
+//
+//
+//
+//        //TODO FUNDATIE
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(89,33.6,0),new MecanumConstraints(ONEBIG_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(89,27.5))
+//                .build());
+//        drive.turnSync(Math.toRadians(-90));
+//        agataDreapta.setPosition(1);
+//        agataStanga.setPosition(1);
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(89,27.5,Math.toRadians(-90)),new MecanumConstraints(ONEBIG_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(84.5,35))
+//                .build());
+//        agataStanga.setPosition(0);
+//        agataDreapta.setPosition(0);
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(84.5,35,Math.toRadians(-90)),new MecanumConstraints(ONEBIG_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(83,36.5))
+//                .build());
+//
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(83,39.5,Math.toRadians(-90)), new MecanumConstraints(ONEBIG_CONSTRAINTS,TRACK_WIDTH))
+//                .forward(20)
+//                .build());
+//        drive.turnSync(Math.toRadians(-90));
+//
+//        agataDreapta.setPosition(1);
+//        agataStanga.setPosition(1);
+//
+//        //TODO PARCARE
+//        drive.followTrajectorySync(new TrajectoryBuilder(drive.getPoseEstimate(), new MecanumConstraints(BASE_CONSTRAINTS, TRACK_WIDTH))
+//                .strafeTo(new Vector2d(-35 ,70))
+//                .build());
+//
+//    }
+//
+//    public void cazStangaRosu(SampleMecanumDriveBase drive){
+//        lasaManaSpate.setPosition(0.5);
+//        //TODO 1 cub
+//        drive.followTrajectorySync(drive.trajectoryBuilder().strafeTo(new Vector2d(-25,25.6)).build());
+//        prindeSpate();
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(-25,25.6,0), new MecanumConstraints(FAST_CONSTRAINTS, TRACK_WIDTH))
+//                .strafeTo(new Vector2d(20,22.5))
+//                .strafeTo(new Vector2d(60,22.5))
+//                .strafeTo(new Vector2d(77.1,31))
+//                .build());
+//        lasaSpate();
+//        //TODO 2 cub
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(77.1,31,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .reverse()
+//                .strafeTo(new Vector2d(45,24.5))
+//                .strafeTo(new Vector2d(35,24.5))
+//                .strafeTo(new Vector2d(-2.1,29.4))
+//                .build());
+//        prindeSpate();
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(-2.1,29.4,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(25,24))
+//                .strafeTo(new Vector2d(60,24))
+//                .strafeTo(new Vector2d(92,32.3))
+//                .build());
+//        lasaSpate();
+//        //TODO 3 cub
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(92,32.3,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(60,24.5))
+//                .strafeTo(new Vector2d(35,24.5))
+//                .strafeTo(new Vector2d(13.3,30.1))
+//                .build());
+//        prindeSpate();
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(13.3,30.1,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(25,24))
+//                .strafeTo(new Vector2d(60,24))//-80 23
+//                .strafeTo(new Vector2d(85,35)) //x =-100 y=29.5
+//                .build());
+//        lasaSpate();
+//
+//
+//
+//        //TODO 4 cub
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(85,35,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(60,24.5))
+//                .strafeTo(new Vector2d(20,24.5))
+//                .strafeTo(new Vector2d(-4.2,30.5))
+//                .build()
+//        );
+//        prinde();
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(-4.2,30.5,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(10,24))
+//                .strafeTo(new Vector2d(70,24))//-80 23
+//                .strafeTo(new Vector2d(91,33.3)) //x =-100 y=29.5
+//                .build());
+//        lasa();
+//
+//
+//
+//
+//
+//
+//        //TODO FUNDATIE
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(91,33.3,0),new MecanumConstraints(ONEBIG_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(89,27.5))
+//                .build());
+//        drive.turnSync(Math.toRadians(-90));
+//        agataDreapta.setPosition(1);
+//        agataStanga.setPosition(1);
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(89,27.5,Math.toRadians(-90)),new MecanumConstraints(ONEBIG_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(84.5,34))
+//                .build());
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(84.5,34,Math.toRadians(-90)),new MecanumConstraints(ONEBIG_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(83,39.5))
+//                .build());
+//
+//        agataStanga.setPosition(0);
+//        agataDreapta.setPosition(0);
+//sleep(450);
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(83,39.5,Math.toRadians(-90)), new MecanumConstraints(ONEBIG_CONSTRAINTS,TRACK_WIDTH))
+//                .forward(17)
+//                .build());
+//        drive.turnSync(Math.toRadians(-90));
+//
+//        agataDreapta.setPosition(1);
+//        agataStanga.setPosition(1);
+//
+//        //TODO PARCARE
+//        drive.followTrajectorySync(new TrajectoryBuilder(drive.getPoseEstimate(), new MecanumConstraints(ONEBIG_CONSTRAINTS, TRACK_WIDTH))
+//                .strafeTo(new Vector2d(-35 ,70))
+//                .build());
+//
+//    }
+//
+//    public void cazCentruRosu(SampleMecanumDriveBase drive){
+//        lasaManaSpate.setPosition(0.5);
+//        //TODO 1 cub
+//        drive.followTrajectorySync(drive.trajectoryBuilder().strafeTo(new Vector2d(-17.4,25.3)).build());
+//        prindeSpate();
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(-17.4,25.3,0), new MecanumConstraints(FAST_CONSTRAINTS, TRACK_WIDTH))
+//                .strafeTo(new Vector2d(20,23))
+//                .strafeTo(new Vector2d(60,23))
+//                .strafeTo(new Vector2d(77.1,31))
+//                .build());
+//        lasaSpate();
+//        //TODO 2 cub
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(77.1,31,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .reverse()
+//                .strafeTo(new Vector2d(45,24.5))
+//                .strafeTo(new Vector2d(35,24.5))
+//                .strafeTo(new Vector2d(5.8,29))
+//                .build());
+//        prindeSpate();
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(5.8,29,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(25,24))
+//                .strafeTo(new Vector2d(60,24))
+//                .strafeTo(new Vector2d(93,32.4))
+//                .build());
+//        lasaSpate();
+//        //TODO 3 cub
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(93,32.4,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(60,24.5))
+//                .strafeTo(new Vector2d(35,24.8))
+//                .strafeTo(new Vector2d(13.3,29.8))
+//                .build());
+//        prindeSpate();
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(13.3,29.8,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(25,24))
+//                .strafeTo(new Vector2d(60,24.3))//-80 23
+//                .strafeTo(new Vector2d(85,33)) //x =-100 y=29.5
+//                .build());
+//        lasaSpate();
+//        //TODO 4 cub
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(85,33,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(60,24.5))
+//                .strafeTo(new Vector2d(20,24.5))
+//                .strafeTo(new Vector2d(-12.1,29))
+//                .build()
+//        );
+//        prinde();
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(-12.1,29,0),new MecanumConstraints(FAST_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(10,24.4))
+//                .strafeTo(new Vector2d(70,24.4))//-80 23
+//                .strafeTo(new Vector2d(91,33.3)) //x =-100 y=29.5
+//                .build());
+//        lasa();
+//
+//
+//
+//
+//
+//
+//        //TODO FUNDATIE
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(91,33.3,0),new MecanumConstraints(ONEBIG_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(89,27.5))
+//                .build());
+//        drive.turnSync(Math.toRadians(-90));
+//        agataDreapta.setPosition(1);
+//        agataStanga.setPosition(1);
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(89,27.5,Math.toRadians(-90)),new MecanumConstraints(ONEBIG_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(84.5,34))
+//                .build());
+//        agataStanga.setPosition(0);
+//        agataDreapta.setPosition(0);
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(84.5,34,Math.toRadians(-90)),new MecanumConstraints(ONEBIG_CONSTRAINTS,TRACK_WIDTH))
+//                .strafeTo(new Vector2d(83,39.5))
+//                .build());
+//
+//        drive.followTrajectorySync(new TrajectoryBuilder(new Pose2d(83,38.6,Math.toRadians(-90)), new MecanumConstraints(ONEBIG_CONSTRAINTS,TRACK_WIDTH))
+//                .forward(20)
+//                .build());
+//        drive.turnSync(Math.toRadians(-90));
+//
+//        agataDreapta.setPosition(1);
+//        agataStanga.setPosition(1);
+//
+//        //TODO PARCARE
+//        drive.followTrajectorySync(new TrajectoryBuilder(drive.getPoseEstimate(), new MecanumConstraints(BASE_CONSTRAINTS, TRACK_WIDTH))
+//                .strafeTo(new Vector2d(-35 ,70))
+//                .build());
+//
+//    }
+//}

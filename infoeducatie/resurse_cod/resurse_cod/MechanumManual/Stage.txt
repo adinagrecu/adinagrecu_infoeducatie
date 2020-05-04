@@ -1,0 +1,115 @@
+package org.firstinspires.ftc.teamcode.MechanumTeleOp;
+
+
+import com.acmerobotics.dashboard.config.Config;
+
+import org.firstinspires.ftc.teamcode.AndreiUtils.SimpleLift;
+@Config
+public class Stage {
+    private int stage;
+    private int stageValue;
+
+
+    public static int ONE_STAGE = 550;
+    public static int TWO_STAGE = 690;
+    public static int THREE_STAGE = 900;
+    public static int FOUR_STAGE = 1090;
+    public static int FIVE_STAGE = 1220;
+    public static int SIX_STAGE = 1330;
+    public static int SEVEN_STAGE = 1410;
+    public static int EIGHT_STAGE = 1530;
+    public static int NINE_STAGE = 1640;
+    public static int TEN_STAGE = 1790;
+    public static int ELEVEN_STAGE = 1855;
+    public static int TWELVE_STAGE = 1970;
+
+    private final int MAX_STAGE = 12;
+
+    public Stage() {
+        this.stage = 1;
+        this.stageValue = ONE_STAGE;
+    }
+
+    public void stageUP(){
+        this.stage++;
+        updateStage();
+    }
+
+    public void stageDown(){
+        this.stage--;
+        updateStage();
+    }
+    public void stageSet(int stage){
+        this.stage = stage;
+        updateStage();
+    }
+    public void updateStage(){
+        switch (stage){
+            case 1: {
+
+                stageValue = ONE_STAGE;
+                break;
+            }
+            case 2:
+            {
+                stageValue = TWO_STAGE;
+                break;
+            }
+            case 3:
+            {
+                stageValue = THREE_STAGE;
+                break;
+            }
+            case 4:{
+                stageValue = FOUR_STAGE;
+                break;
+            }
+            case 5:{
+                stageValue = FIVE_STAGE;
+                break;
+            }
+            case 6:{
+                stageValue = SIX_STAGE;
+                break;
+            }
+            case 7:{
+                stageValue = SEVEN_STAGE;
+                break;
+            }
+            case 8:{
+                stageValue = EIGHT_STAGE;
+                break;
+            }
+            case 9:{
+                stageValue = NINE_STAGE;
+                break;
+            }
+            case 10:{
+                stageValue = TEN_STAGE;
+                break;
+            }
+            case 11:{
+                stageValue = ELEVEN_STAGE;
+                break;
+            }
+            case 12:{
+                stageValue = TWELVE_STAGE;
+                break;
+            }
+            default:{
+                stage = 1;
+                stageValue = ONE_STAGE;
+                break;
+            }
+
+        }
+    }
+
+    public int getStage() {
+        return stage;
+    }
+
+    public int getStageValue() {
+        return stageValue;
+    }
+}

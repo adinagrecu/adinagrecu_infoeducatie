@@ -1,0 +1,11 @@
+package Utils;
+
+class Pose extends Point {
+    private double angle;
+
+    public Pose(double x, double y, double angle){
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+    }
+}

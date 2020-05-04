@@ -1,0 +1,81 @@
+import com.arcrobotics.ftclib.controller.PIDFController;
+import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+import com.arcrobotics.ftclib.hardware.motors.MotorImplEx;
+import com.arcrobotics.ftclib.util.Timing;
+
+import java.util.concurrent.TimeUnit;
+
+public class SimpleLift {
+    MotorImplEx m_liftMotor;
+    MotorImplEx m_liftMotor2;
+    PIDFController m_controller;
+    int downTicks = 60;
+
+    public SimpleLift(){
+
+    }
+
+    public SimpleLift(MotorImplEx liftMotorWithEncoder, MotorImplEx lift2, PIDFController controller,  boolean isReversedEncMotor, boolean isReversedMotor2, boolean Break) {
+        m_liftMotor2 = lift2;
+        m_liftMotor = liftMotorWithEncoder;
+        m_controller = controller;
+        m_liftMotor.encoder.resetEncoderCount();
+        m_liftMotor.setInverted(isReversedEncMotor);
+        m_liftMotor2.setInverted(isReversedMotor2);
+        if(Break){
+            m_liftMotor.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BREAK);
+            m_liftMotor2.setZeroPowerBehavior(MotorEx.ZeroPowerBehavior.BREAK);
+        }
+    }
+
+    public void moveLift(double power) {
+//        double error = m_controller.calculate(power, m_liftMotor.getPower());
+//        m_liftMotor.setPower(m_liftMotor.getPower() + error);
+        double error = m_controller.calculate(power, m_liftMotor.getPower());
+        m_liftMotor.setPower(error);
+        m_liftMotor2.setPower(error);
+    }
+
+    public void moveToPosition(double desiredTicks) {
+        if (m_controller.atSetPoint()) m_controller.reset();
+        double err = m_controller.calculate(desiredTicks, m_liftMotor.getEncoderPulses());
+        m_liftMotor.setPower(-err);
+        m_liftMotor2.setPower(-err);
+    }
+
+    public int getDownTicks() {
+        return downTicks;
+    }
+
+    public void goDown(){
+        if (m_controller.atSetPoint()) m_controller.reset();
+        double err = m_controller.calculate(downTicks, m_liftMotor.getEncoderPulses())
+                / downTicks;
+        m_liftMotor.setPower(-err/10);
+        m_liftMotor2.setPower(-err/10);
+        }
+
+
+
+    public void moveWithTimer(int activeTime) {
+        Timing.Timer timer = new Timing.Timer(activeTime, TimeUnit.MILLISECONDS);
+        timer.start();
+
+        while (!timer.done()) {
+            m_liftMotor.setPower(m_controller.calculate(activeTime, timer.currentTime()) / activeTime);
+        }
+    }
+
+    public void resetPositionCounter() {
+        m_liftMotor.encoder.resetEncoderCount();
+    }
+
+    public double getPowerMove(){
+        return m_liftMotor.getPower();
+    }
+
+
+    public MotorImplEx getM_liftMotor() {
+        return m_liftMotor;
+    }
+}

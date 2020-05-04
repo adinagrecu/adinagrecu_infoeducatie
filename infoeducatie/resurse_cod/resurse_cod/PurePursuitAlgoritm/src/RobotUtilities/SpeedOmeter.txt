@@ -1,0 +1,90 @@
+package RobotUtilities;
+
+import static Utils.Geometry.angleWrapRad;
+import static com.company.Robot.worldAngle_rad;
+
+//Sim viteza
+
+public class SpeedOmeter {
+    private static long lastUpdateStartTime = 0;
+    private static double currSpeedY = 0.0;
+    private static double currSpeedX = 0.0;
+
+
+    public static int timeBetweenUpdates = 25;
+    public static double yDistTraveled = 0;
+    public static double xDistTraveled = 0;
+
+
+    public static double lastAngle = 0;
+
+    public static double angularVelocity = 0;
+
+
+    public static void update(){
+        long currTime = System.currentTimeMillis();
+
+
+        if(Math.abs(yDistTraveled) < 0.000000001 && Math.abs(xDistTraveled) < 0.000000001 &&
+                Math.abs(angularVelocity) < 0.000001){
+            return;
+        }
+
+
+        if(currTime - lastUpdateStartTime > timeBetweenUpdates){
+
+            double elapsedTime = (double) (currTime - lastUpdateStartTime)/1000.0;
+            double speedY = yDistTraveled / elapsedTime;
+            double speedX = xDistTraveled / elapsedTime;
+
+            if(speedY < 200 && speedX < 200){
+                currSpeedY = speedY;
+                currSpeedX = speedX;
+            }
+
+
+            angularVelocity = angleWrapRad(worldAngle_rad-lastAngle) / elapsedTime;
+            lastAngle = worldAngle_rad;
+
+            yDistTraveled = 0;
+            xDistTraveled = 0;
+            lastUpdateStartTime = currTime;
+        }
+    }
+
+    public static double getSpeedY(){
+        return currSpeedY;
+    }
+    public static double getSpeedX(){
+        return currSpeedX;
+    }
+
+    public static double getDegPerSecond() {
+        return Math.toDegrees(angularVelocity);
+    }
+    public static double getRadPerSecond(){
+        return angularVelocity;
+    }
+
+    public static double scalePrediction = 1.0;
+
+    public static double ySlipDistanceFor1CMPS = 0.14 * scalePrediction;//0.169;
+    public static double xSlipDistanceFor1CMPS = 0.153 * scalePrediction;//0.117;
+
+    public static double turnSlipAmountFor1RPS = 0.09 * scalePrediction;//0.113;
+
+
+
+    public static double currSlipDistanceY(){
+        return SpeedOmeter.getSpeedY() * ySlipDistanceFor1CMPS;
+    }
+
+    public static double currSlipDistanceX(){
+        return SpeedOmeter.getSpeedX() * xSlipDistanceFor1CMPS;
+    }
+
+
+    public static double currSlipAngle(){
+        return getRadPerSecond() * turnSlipAmountFor1RPS;
+    }
+}

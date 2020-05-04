@@ -1,0 +1,81 @@
+package org.firstinspires.ftc.teamcode.drive;
+
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.control.PIDCoefficients;
+import com.acmerobotics.roadrunner.control.PIDFController;
+import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
+import com.qualcomm.hardware.motors.NeveRest20Gearmotor;
+import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
+
+/*
+ 
+ *  https://192.168.49.1:8080/dash)
+
+ */
+@Config
+public class DriveConstants {
+
+    
+    private static final MotorConfigurationType MOTOR_CONFIG =
+            MotorConfigurationType.getMotorType(NeveRest20Gearmotor.class);
+
+    
+    public static final boolean RUN_USING_ENCODER = true;
+    public static PIDCoefficients MOTOR_VELO_PID = new PIDCoefficients(16,4,6);// 26,1,13
+
+    
+    public static double WHEEL_RADIUS = 2;
+    public static double GEAR_RATIO = 1; 
+    public static double TRACK_WIDTH = 12.6;//12.55 12.8
+
+    
+    public static double kV = 1.0 / rpmToVelocity(getMaxRpm());
+    public static double kA = 0;
+    public static double kStatic = 0;
+
+    /*
+     Valorile sunt folosite pentru a planifica traiectoriile urmatore.
+     */
+
+    public static DriveConstraints SLOW_CONSTRAINTS = new DriveConstraints(
+            20.0, 20.0, 0.0,
+            Math.toRadians(180.0), Math.toRadians(180.0), 0.0
+    );
+
+    public static DriveConstraints FAST_CONSTRAINTS = new DriveConstraints(
+            65.0, 65.0, 0.0,
+            Math.toRadians(180.0), Math.toRadians(180.0), 0.0);
+
+    public static DriveConstraints BASE_CONSTRAINTS = new DriveConstraints(
+            45.0, 30.0, 0.0,
+            Math.toRadians(180.0), Math.toRadians(180.0), 0.0
+    );
+    public static DriveConstraints ONEBIG_CONSTRAINTS = new DriveConstraints(
+            85.0, 85.0, 0.0,
+            Math.toRadians(180.0), Math.toRadians(180.0), 0.0
+    );
+
+
+    public static double encoderTicksToInches(double ticks) {
+        return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / MOTOR_CONFIG.getTicksPerRev();
+    }
+
+    public static double rpmToVelocity(double rpm) {
+        return rpm * GEAR_RATIO * 2 * Math.PI * WHEEL_RADIUS / 60.0;
+    }
+
+    public static double getMaxRpm() {
+        return MOTOR_CONFIG.getMaxRPM() *
+                (RUN_USING_ENCODER ? MOTOR_CONFIG.getAchieveableMaxRPMFraction() : 1.0);
+    }
+
+    public static double getTicksPerSec() {
+        // note: MotorConfigurationType#getAchieveableMaxTicksPerSecond() nu e ce vrem
+        return (MOTOR_CONFIG.getMaxRPM() * MOTOR_CONFIG.getTicksPerRev() / 60.0);
+    }
+
+    public static double getMotorVelocityF() {
+        
+        return 32767 / getTicksPerSec();
+    }
+}
